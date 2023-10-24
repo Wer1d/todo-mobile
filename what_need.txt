@@ -1,0 +1,2 @@
+modal ทำหน้า add กับ แก้ไข
+date picker map เป็น string วันไทย ต้องแก้ใน DB? 
