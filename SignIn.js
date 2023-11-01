@@ -1,6 +1,4 @@
-import { View, Text, Alert } from "react-native"
-import { StyleSheet } from "react-native";
-import { TextInput } from "react-native";
+import { View, Text, Alert, StyleSheet, TextInput } from "react-native"
 import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import axios from "axios";
@@ -13,12 +11,10 @@ export default function SignIn() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [hide, setHide] = useState(true);
-    const togglePasswordVisibility = () => {
-        setHide(!hide);
-    };
+    
     const storeCookie = async (token) => {
       try {
-        console.log("Storing token in AsyncStorage");
+        console.log("Storing token in AsyncStorage\n");
         console.log(token);
         await AsyncStorage.setItem('token', token);
         
@@ -27,21 +23,22 @@ export default function SignIn() {
       }
     };  
     const signIn = () => {
-      axios.post('https://4a49-161-200-191-29.ngrok-free.app/Tokens', 
+      axios.post('https://7b19-49-228-96-103.ngrok-free.app/Tokens', 
         { username: username, password: password },
         { headers: { /* Authorization: 'Bearer ' + token */ }, timeout: 10 * 1000 }
       )
         .then(async (response) => {
           console.log("hi")
           const token = response.data.token;
-          console.log(token);
+          console.log(token+"\n");
           console.log(response.data);
           await storeCookie(token);
                   
-          Alert.alert('Login successful');
-          // setUsername('');
-          // setPassword('');
-          navigation.navigate('main');
+          Alert.alert('Login successful', '', [{ text: 'OK', onPress: () => {
+            setUsername(''); // Clearing username
+            setPassword(''); // Clearing password
+            navigation.navigate('AppDrawer');
+          }}]);
         })
         .catch((error) => {
           if (error.code === 'ERR_NETWORK') {
@@ -83,11 +80,8 @@ export default function SignIn() {
       });
     
 
-    const handleForgotPassword = () => {
-        navigation.navigate('reset-password');
-    };
     const handleSignUp = () => {
-        navigation.navigate('sign-up');
+        navigation.navigate('SignUp');
     };
     return (
         
@@ -109,9 +103,6 @@ export default function SignIn() {
                 <Text>เข้าสู่ระบบ</Text>
               </Button>
 
-              <Button mode='elevated' style={styles.button} onPress={() => navigation.navigate('reset-password')}>
-                <Text>Forgot Password</Text>
-              </Button>
 
               <Button mode='elevated' style={styles.button} onPress={handleSignUp}>
                 <Text>Sign Up</Text>

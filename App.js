@@ -1,39 +1,40 @@
 import { NavigationContainer } from '@react-navigation/native';
-import SignIn from './SignIn'
+import SignIn from './SignIn';
 import SignUp from './SignUp'
 import Credit from './Credit'
 import SignOut from './SignOut'
 import Main from './Main'
-import ResetPassword from './ResetPassword'
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+import {  StyleSheet, Text, View } from 'react-native';
 import { Header, createStackNavigator } from '@react-navigation/stack';
 import { PaperProvider } from 'react-native-paper';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
-export default function App() {
-  AppRegistry.registerComponent('App', () => App);
-  const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
+
+function AppDrawer() {
   return (
-    <PaperProvider>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="sign-in">
-          <Stack.Screen name="sign-in" component={SignIn} />
-          <Stack.Screen name="sign-up" component={SignUp} />
-          <Stack.Screen name="credit" component={Credit} />
-          <Stack.Screen name="sign-out" component={SignOut} />
-          <Stack.Screen name="reset-password" component={ResetPassword} />
-          <Stack.Screen name="main" component={Main} options={{headerLeft: () => null}}/> 
-      </Stack.Navigator>
-    </NavigationContainer>
-    </PaperProvider>
+    <Drawer.Navigator initialRouteName='Main'>
+      <Drawer.Screen name="Main" component={Main} options={{headerLeft:null}}/>
+      <Drawer.Screen name="Credit" component={Credit} />
+      <Drawer.Screen name="SignOut" component={SignOut} />
+    </Drawer.Navigator>
   );
 }
 
-/* เพิ่ม option ไม่งั้น พอloginเสร็จมันจะมีปุ่มถอยกลับ*/
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <PaperProvider>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="SignIn">
+        <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: true, headerLeft:null }}/>
+        <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: true, headerLeft:null }}/>
+        <Stack.Screen name="AppDrawer" component={AppDrawer} options={{ headerShown: false , headerLeft:null}}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+    </PaperProvider>
+    
+  );
+}
+
+
