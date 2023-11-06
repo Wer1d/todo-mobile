@@ -5,8 +5,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import moment from 'moment-timezone'; // Import moment-timezone
-
+import moment from "moment";
 export default function Main({ navigation }) {
   const [activity, setActivity] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -14,8 +13,8 @@ export default function Main({ navigation }) {
   const [token, setToken] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [updateVisible, setUpdateVisible] = useState(false);
-  const [addVisible, setAddVisible] = useState(false);
+  // const [updateVisible, setUpdateVisible] = useState(false);
+  // const [addVisible, setAddVisible] = useState(false);
   const [formState, setFormState] = useState({
     modalVisible: false,
     editMode: false,
@@ -35,53 +34,59 @@ export default function Main({ navigation }) {
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate ;
     setShowDatePicker(false);
-    
+    console.log("onChangeDate",currentDate)
     setSelectedDate(currentDate);
   };
 
   const onChangeTime = (event, selectedTime) => {
     const currentTime = selectedTime ;
+    console.log("onChangeTime",currentTime)
+
     setShowTimePicker(false);
     
-  setSelectedTime(currentTime);
+    setSelectedTime(currentTime);
   };
-  const formatToThaiDateTime = (dateTime, timezone = 'Asia/Bangkok') => {
-    const date = moment(dateTime);
-    console.log("date",date)
-    const year = date.year() + 543; // Convert CE to BE
-  
-    // Map English month names to Thai month names
-    const monthMapping = {
-      'Jan': 'ม.ค',
-      'Feb': 'ก.พ',
-      'Mar': 'มี.ค',
-      'Apr': 'เม.ย',
-      'May': 'พ.ค',
-      'Jun': 'มิ.ย',
-      'Jul': 'ก.ค',
-      'Aug': 'ส.ค',
-      'Sep': 'ก.ย',
-      'Oct': 'ต.ค',
-      'Nov': 'พ.ย',
-      'Dec': 'ธ.ค',
+  const formatToThaiDateTime = (dateTime) => {
+    console.log("dateTime",dateTime)
+    const date = moment(dateTime)
+    console.log("+++++++++++++++++=======================")
+    const monthAbbreviations = {
+      'January': 'ม.ค.',
+      'Febuary': 'ก.พ.',
+      'March': 'มี.ค.',
+      'April': 'เม.ย.',
+      'May': 'พ.ค.',
+      'June': 'มิ.ย.',
+      'July': 'ก.ค.',
+      'August': 'ส.ค.',
+      'September': 'ก.ย.',
+      'October': 'ต.ค.',
+      'November': 'พ.ย.',
+      'December': 'ธ.ค.'
     };
-  
-    const monthAbbreviation = date.format('MMM');
-    const thaiMonth = monthMapping[monthAbbreviation];
-  
-    return `${date.format('D')} ${thaiMonth} ${year} เวลา ${date.tz(timezone).format('HH:mm')} น`;
+    const monthAbbreviation = monthAbbreviations[date.format('MMMM')]; // Get the abbreviation for the month
+    console.log("monthAbbreviation",date.format('MMMM'))
+    const year = date.year() + 543;  // Convert CE to BE
+    return `${date.format('DD')-1} ${monthAbbreviation} ${year} ${date.format('HH:mm')}`;
   };
-  const handleActivitySubmit = async () => {
-    const endpoint = formState.editMode ? `https://7b19-49-228-96-103.ngrok-free.app/Activites/${formState.currentActivity['id']}` : 'https://7b19-49-228-96-103.ngrok-free.app/Activites';
+  const handleActivitySubmit =  () => {
+    const endpoint = formState.editMode ? `https://026d-49-228-104-117.ngrok-free.app/Activites/${formState.currentActivity['id']}` : 'https://026d-49-228-104-117.ngrok-free.app/Activites';
     console.log(endpoint)
     const method = formState.editMode ? 'PUT' : 'POST';
-    console.log(method)
-    console.log("selectionDate Date " , selectedDate.getDate()) 
-    const currentDateTime = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), selectedTime.getHours(), selectedTime.getMinutes(), selectedTime.getSeconds(), selectedTime.getMilliseconds());
-    console.log(selectedDate)
-    console.log(selectedTime)
+    
+
+    const currentDateTime = new Date(
+      selectedDate.getUTCFullYear(), 
+      selectedDate.getUTCMonth(), 
+      selectedDate.getUTCDate(),
+      (selectedTime.getUTCHours() - selectedDate.getTimezoneOffset() / 60)+7,
+      selectedTime.getUTCMinutes() - (selectedDate.getTimezoneOffset() % 60),
+      selectedTime.getUTCSeconds(),
+      selectedTime.getUTCMilliseconds()
+    );
+
     console.log("currentDateTime")
-    console.log(currentDateTime);
+    console.log(currentDateTime)
     formState.currentActivity.name = formState.currentActivity.activityName;
     const data = formState.editMode ? { activityName: formState.currentActivity['activityName'] , when: currentDateTime  } :{ activityName: formState.currentActivity['activityName'] , when: currentDateTime };
     console.log(data)
@@ -94,7 +99,7 @@ export default function Main({ navigation }) {
               // const updatedActivity = activity.map((item) => item.id === formState.currentActivity['id'] ? formState.currentActivity : item);
               // setActivity([updatedActivity]);
               axios
-                .get("https://7b19-49-228-96-103.ngrok-free.app/Activites", {
+                .get("https://026d-49-228-104-117.ngrok-free.app/Activites", {
                     headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "69420"},
                     timeout: 10000,
                 })
@@ -103,7 +108,7 @@ export default function Main({ navigation }) {
                 })
             } else{
               axios
-                .get("https://7b19-49-228-96-103.ngrok-free.app/Activites", {
+                .get("https://026d-49-228-104-117.ngrok-free.app/Activites", {
                     headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "69420"},
                     timeout: 10000,
                 })
@@ -123,12 +128,12 @@ export default function Main({ navigation }) {
   const deleteActivity = async (activityId) => {
     console.log(activityId)
     axios
-      .delete(`https://7b19-49-228-96-103.ngrok-free.app/Activites/${activityId}`, {
+      .delete(`https://026d-49-228-104-117.ngrok-free.app/Activites/${activityId}`, {
         headers: { Authorization: `Bearer ${token}` , "ngrok-skip-browser-warning": "69420" , timeout: 10000,},
       })
       .then((response) => {
         axios
-                .get("https://7b19-49-228-96-103.ngrok-free.app/Activites", {
+                .get("https://026d-49-228-104-117.ngrok-free.app/Activites", {
                     headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "69420"},
                     timeout: 10000,
                 })
@@ -154,7 +159,7 @@ export default function Main({ navigation }) {
     getToken().then((token) => {
       if (token) {
         axios
-          .get("https://7b19-49-228-96-103.ngrok-free.app/Activites", {
+          .get("https://026d-49-228-104-117.ngrok-free.app/Activites", {
             headers: { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "69420"},
             timeout: 10000,
           })
@@ -171,9 +176,55 @@ export default function Main({ navigation }) {
       }
     });
   }, [token]);
+  moment.locale('th');
+
+  const styles = {
+    container: {
+      flex: 1,
+      backgroundColor: "#fff", // use a light background
+      padding: 20,
+    },
+    header: {
+      flexDirection: "row",
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderColor: "#e1e1e1",
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: "#333", // dark text for readability
+      flex: 1,
+    },
+    
+    button: {
+      backgroundColor: "#2196F3", // primary color
+      borderRadius: 10,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      marginVertical: 5,
+    },
+    buttonText: {
+      color: "#fff", // white text for the buttons
+      textAlign: "center",
+      fontWeight: "bold",
+    },
+    input: {
+      borderBottomWidth: 1,
+      borderBottomColor: "#ccc",
+      paddingVertical: 8,
+    },
+    
+    modalContent: {
+      width: "80%",
+      padding: 20,
+      backgroundColor: "white",
+      borderRadius: 10,
+    },
+  };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <DataTable>
         <DataTable.Header>
           <DataTable.Title style={{ flex: 2 }}>กิจกรรม</DataTable.Title>
@@ -200,11 +251,12 @@ export default function Main({ navigation }) {
         ))}
       </DataTable>
 
-      <Button
+      <Button style={styles.button}
         title="Add"
         onPress={() => setFormState({ modalVisible: true, editMode: false, currentActivity: null })}
       />
       <Modal
+        style={{padding: 20,borderRadius: 10}}
         animationType="slide"
         transparent={true}
         visible={formState.modalVisible}
@@ -218,9 +270,10 @@ export default function Main({ navigation }) {
         }}
       >
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <View style={{ width: "80%", padding: 20, backgroundColor: "white", borderRadius: 10 }}>
-            <Text>{formState.editMode ? " Edit activity" : " Add activity"}</Text>
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>{formState.editMode ? " Edit activity" : " Add activity"}</Text>
             <TextInput
+            style={styles.input}
               value={formState.currentActivity?.activityName || ''}
               onChangeText={(text) =>
                 setFormState((prevState) => ({
@@ -229,10 +282,16 @@ export default function Main({ navigation }) {
                 }))
               }
               placeholder="Activity Name"
-              style={{ borderBottomWidth: 1, borderBottomColor: "#ccc" }}
+              
             />
-            <Button title="Pick Date" onPress={showDatepicker} />
-            <Button title="Pick Time" onPress={showTimepicker} />
+            <TouchableOpacity style={[styles.button]} onPress={showDatepicker}>
+              <Text style={styles.buttonText}>Pick Date</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button]} onPress={showTimepicker}>
+              <Text style={styles.buttonText}>Pick Time</Text>
+            </TouchableOpacity>
             {showDatePicker && (
               <DateTimePicker
                 value={selectedDate}
@@ -243,15 +302,17 @@ export default function Main({ navigation }) {
             )}
             {showTimePicker && (
               <DateTimePicker
-                value={selectedDate}
+                value={selectedTime}
                 mode="time"
                 display="default"
                 onChange={onChangeTime}
               />
             )}
-            <Button title="Submit" onPress={handleActivitySubmit}/>
-            <Button
-              title="Cancel"
+            <TouchableOpacity style={styles.button} onPress={handleActivitySubmit}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]} // Apply both button and cancelButton styles
               onPress={() =>
                 setFormState((prevState) => ({
                   ...prevState,
@@ -260,7 +321,9 @@ export default function Main({ navigation }) {
                   currentActivity: null,
                 }))
               }
-            />
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
